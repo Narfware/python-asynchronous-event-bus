@@ -7,9 +7,13 @@ def main():
     bus = EventBus()
     bus.add_handlers("user_created", [send_email, destroy_company, send_message, compute_cosmos])
 
+    print(f"Executing application on main thread => active threads: {threading.active_count()}")
+
     create_user = CreateUser(bus)
 
     create_user.execute({"name": "Joana", "email": "joanadoe@gmail.com"})
+
+    print(f"Application finished using {threading.active_count()} threads")  # Main thread (1), one thread for each listener (4) and one thread (1) for manage future results.
 
 
 def send_email(data):

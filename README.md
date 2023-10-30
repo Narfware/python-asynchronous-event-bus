@@ -3,8 +3,7 @@
 Asynchronous event bus with python threads.
 
 - PoC
-- Run asynchronous task without main coroutine.
-
+- Run asynchronous tasks without block caller thread.
 
 # Console output
 

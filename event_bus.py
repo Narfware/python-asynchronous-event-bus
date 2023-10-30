@@ -16,16 +16,13 @@ class EventBus():
     def emit(self, event_name: str, event: dict) -> None:
         handlers = self.handlers.get(event_name)
 
-        executor = concurrent.futures.ThreadPoolExecutor(len(handlers))
+        executor = concurrent.futures.ThreadPoolExecutor(len(handlers))  # Run one thread for each handler
 
         futures = [executor.submit(handler, event) for handler in handlers]
 
-        self.spawn_thread(target=self.manage_future_result, kwargs={"futures": futures, "executor": executor})
+        self.spawn_thread(self.manage_futures_result, False, futures, executor) # Manage futures result synchronously in a new thread to avoid block the caller thread.
 
-    def manage_future_result(self, kwargs):
-        futures: list[concurrent.futures.Future] = kwargs.get("futures")
-        executor: concurrent.futures.Executor = kwargs.get("executor")
-
+    def manage_futures_result(self, futures: list[concurrent.futures.Future], executor: concurrent.futures.Executor):
         print(f"managing futures in thread {threading.get_ident()}")
 
         for future in futures:
@@ -36,5 +33,5 @@ class EventBus():
 
         executor.shutdown()
 
-    def spawn_thread(self, target, **kwargs):
-        threading.Thread(target=target, kwargs=kwargs).start()
+    def spawn_thread(self, target, daemon, *args, **kwargs):
+        threading.Thread(target=target, daemon=daemon, args=args, kwargs=kwargs).start()
